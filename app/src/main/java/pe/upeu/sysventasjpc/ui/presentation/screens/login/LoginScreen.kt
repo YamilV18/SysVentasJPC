@@ -7,22 +7,22 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.k0shk0sh.compose.easyforms.BuildEasyForms
@@ -54,64 +54,66 @@ fun LoginScreen(
     val isLogin by viewModel.islogin.observeAsState(false)
     val isError by viewModel.isError.observeAsState(false)
     val loginResul by viewModel.listUser.observeAsState()
+    val errorMessage by viewModel.errorMessage.observeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    val isPasswordValid = password.length >= 6
-    val isFormValid = isEmailValid && isPasswordValid
-
-    val loginResult by viewModel.listUser.observeAsState()
-    Column(
+    Column (
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+        horizontalAlignment = Alignment.CenterHorizontally) {
         ImageLogin()
         Text("Login Screen", fontSize = 40.sp)
-        LaunchedEffect(isLogin, loginResult) {
-            if (isLogin && loginResult != null) {
-                Log.i("TOKENV", TokenUtils.TOKEN_CONTENT)
-                loginResult?.let {
-                    Log.i("DATA", it.user)
-                }
-                navigateToHome()
+        BuildEasyForms { easyForm ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                EmailTextField(easyForms = easyForm, text ="","E-Mail:", "U")
+                PasswordTextField(easyForms = easyForm, text ="", label ="Password:" )
+                LoginButton(easyForms=easyForm, onClick = {
+                    val dataForm=easyForm.formData()
+                    val user=UsuarioDto(
+                        (dataForm.get(0) as EasyFormsResult.StringResult).value,
+                        (dataForm.get(1) as EasyFormsResult.StringResult).value)
+                    viewModel.loginSys(user)
+                    scope.launch {
+                        delay(3600)
+                        if(isLogin && loginResul!=null){
+                            Log.i("TOKENV", TokenUtils.TOKEN_CONTENT)
+                            Log.i("DATA", loginResul!!.user)
+                            navigateToHome.invoke()
+                        }else{
+                            Log.v("ERRORX", "Error logeo")
+                            Toast.makeText(context,"Error al conectar",Toast.LENGTH_LONG)
+                        }
+                    }
+                },
+
+                    label = "Log In"
+                )
+                /*Button(onClick = {
+                    navigateToHome.invoke()
+                }) {
+                    Text("Ir a Detalle")
+                }*/
+                ComposeReal.COMPOSE_TOP.invoke()
             }
         }
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
-            isError = email.isNotEmpty() && !isEmailValid,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            isError = password.isNotEmpty() && !isPasswordValid,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Button(
-            onClick = {
-                val user = UsuarioDto(user = email, clave = password)
-                viewModel.loginSys(user)
-            },
-            enabled = isFormValid,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Log In")
-        }
-
-        ComposeReal.COMPOSE_TOP.invoke()
+        ErrorImageAuth(isImageValidate = isError)
+        ProgressBarLoading(isLoading = isLoading)
     }
+    // Mostrar Snackbar manualmente
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.wrapContentHeight(Alignment.Bottom).padding(16.dp),
 
-    ErrorImageAuth(isImageValidate = isError)
-    ProgressBarLoading(isLoading = isLoading)
+        )
+    // Mostrar el snackbar cuando haya mensaje de error
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearErrorMessage()
+        }
+    }
 }
 
 

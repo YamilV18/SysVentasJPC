@@ -13,6 +13,8 @@ import pe.upeu.sysventasjpc.ui.presentation.screens.Pantalla3
 import pe.upeu.sysventasjpc.ui.presentation.screens.Pantalla4
 import pe.upeu.sysventasjpc.ui.presentation.screens.Pantalla5
 import pe.upeu.sysventasjpc.ui.presentation.screens.login.LoginScreen
+import pe.upeu.sysventasjpc.ui.presentation.screens.producto.ProductoForm
+import pe.upeu.sysventasjpc.ui.presentation.screens.producto.ProductoMain
 
 @Composable
 fun NavigationHost(
@@ -46,5 +48,21 @@ fun NavigationHost(
             Pantalla4() }
         composable(Destinations.Pantalla5.route) {
             Pantalla5() }
+
+        composable(Destinations.ProductoMainSC.route){
+            ProductoMain(navegarEditarAct = {newText->
+                navController.navigate(Destinations.ProductoFormSC.passId(newText))},
+                navController =navController )
+        }
+        composable(Destinations.ProductoFormSC.route, arguments =
+            listOf(navArgument("prodId"){
+                defaultValue="prodId"
+            })){navBackStackEntry -> var
+                prodId=navBackStackEntry.arguments?.getString("prodId")
+            requireNotNull(prodId)
+            ProductoForm(text = prodId, darkMode = darkMode,
+                navController=navController )
+        }
+
     }
 }

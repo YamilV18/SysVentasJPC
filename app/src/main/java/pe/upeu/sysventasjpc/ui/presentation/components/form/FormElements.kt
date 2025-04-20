@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
@@ -27,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,10 +57,10 @@ import java.util.Calendar
 import java.util.Date
 
 enum class MyFormKeys {
-    EMAIL, PASSWORD, SALUTATION, SALUTATION2,NAME, URL, CUSTOM_FOCUS,
+    EMAIL, PASSWORD, SALUTATION, SALUTATION2,SALUTATION3,NAME, URL, CUSTOM_FOCUS,
     PHONE, CARD, CHECKBOX, LIST_CHECKBOX, TRI_CHECKBOX, RADIO_BUTTON,
     SWITCH, SLIDER, RANGE_SLIDER,DNI, APE_PAT, APE_MAT, FECHA, TIME, TIME_TOLER, MATERIALES, VALIDINSCRIP, ASISSUBACT, ENTSAL, OFFLINE,
-    CUI,TIPOCUI,MATERENTRE,HORAREG,MODFH,ACTIVIDADID
+    CUI,TIPOCUI,MATERENTRE,HORAREG,MODFH,ACTIVIDADID, PU,PU_OLD, UTILIDAD, STOCK, STOCK_OLD
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,11 +78,15 @@ fun ComboBox(
     )
     val text = state.state
     val isOpen = state.isOpen
-    if (textv != "") {
-        val seleccionado = list.find { it.code == textv }
-        text.value = seleccionado!!.name
+
+    // Solo se ejecuta una vez si textv tiene valor inicial
+    LaunchedEffect(textv, list) {
+        if (textv.isNotEmpty()) {
+            list.find { it.code.trim() == textv.trim() }?.let {
+                text.value = it.code+"-"+it.name
+            }
+        }
     }
-    Log.i("DATAXXX",text.value )
     Box{
         Column {
             TextField(
@@ -89,6 +95,13 @@ fun ComboBox(
                 label = { Text(text = label) },
                 placeholder = { Text(text = label) },
                 modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Dropdown",
+                        modifier = Modifier.clickable { state.onClick() }
+                    )
+                }
             )
             Spacer(size=2)
             DropDownList(
@@ -147,10 +160,17 @@ fun ComboBoxTwo(
     )
     val text = state.state
     val isOpen = state.isOpen
-    if (textv != "") {
+    LaunchedEffect(textv, list) {
+        if (textv.isNotEmpty()) {
+            list.find { it.code.trim() == textv.trim() }?.let {
+                text.value = it.code+"-"+it.name
+            }
+        }
+    }
+    /*if (textv != "") {
         val seleccionado = list.find { it.code == textv }
         text.value = seleccionado!!.name
-    }
+    }*/
     Box{
         Column {
             TextField(
@@ -159,6 +179,71 @@ fun ComboBoxTwo(
                 label = { Text(text = label) },
                 placeholder = { Text(text = label) },
                 modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Dropdown",
+                        modifier = Modifier.clickable { state.onClick() }
+                    )
+                }
+            )
+            Spacer(size=2)
+            DropDownList(
+                state = state,
+                requestToOpen = isOpen.value,
+                list = list,
+            )
+        }
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0f)
+                .clickable(onClick = state.onClick)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ComboBoxThre(
+    easyForm: EasyForms,
+    label:String,
+    textv: String,
+    list:List<ComboModel>
+) {
+    val state = easyForm.addAndGetCustomState(
+        MyFormKeys.SALUTATION3, MyEasyFormsCustomStringState(
+            validData = list
+        )
+    )
+    val text = state.state
+    val isOpen = state.isOpen
+    LaunchedEffect(textv, list) {
+        if (textv.isNotEmpty()) {
+            list.find { it.code.trim() == textv.trim() }?.let {
+                text.value = it.code+"-"+it.name
+            }
+        }
+    }
+    /*if (textv != "") {
+        val seleccionado = list.find { it.code == textv }
+        text.value = seleccionado!!.name
+    }*/
+    Box{
+        Column {
+            TextField(
+                value = text.value,
+                onValueChange = state.onValueChangedCallback,
+                label = { Text(text = label) },
+                placeholder = { Text(text = label) },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Dropdown",
+                        modifier = Modifier.clickable { state.onClick() }
+                    )
+                }
             )
             Spacer(size=2)
             DropDownList(
@@ -193,10 +278,17 @@ fun DropdownMenuCustom(
     )
     val text = state.state
     val isOpen = state.isOpen
-    if (textv != "") {
+    LaunchedEffect(textv, list) {
+        if (textv.isNotEmpty()) {
+            list.find { it.code.trim() == textv.trim() }?.let {
+                text.value = it.name
+            }
+        }
+    }
+    /*if (textv != "") {
         val seleccionado = list.find { it.code == textv }
         text.value = seleccionado!!.name
-    }
+    }*/
 
     var expanded by remember { mutableStateOf(false) }
     val selectedCategory = remember { mutableStateOf(list.first()) }
@@ -414,35 +506,34 @@ fun NameTextField(easyForms: EasyForms, text: String, label:String, key:MyFormKe
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailTextField(easyForms: EasyForms, label: String, tipo: String) {
+fun EmailTextField(easyForms: EasyForms, text: String, label:String, tipo:String) {
     val textFieldState = easyForms.getTextFieldState(
         key = MyFormKeys.EMAIL,
         easyFormsValidationType = EmailValidationType,
+        defaultValue = text,
     )
     val state = textFieldState.state
-
     OutlinedTextField(
         value = state.value,
         onValueChange = textFieldState.onValueChangedCallback,
         label = { Text(text = label) },
-        modifier = if (tipo == "U") Modifier.wrapContentWidth() else Modifier.fillMaxWidth(),
+        modifier = if(tipo=="U") Modifier.wrapContentWidth() else Modifier.fillMaxWidth(),
         isError = textFieldState.errorState.value == EasyFormsErrorState.INVALID,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextField(
-    easyForms: EasyForms,
-    label: String,
-    passwordVisibility: MutableState<Boolean> = remember { mutableStateOf(false) }
+fun PasswordTextField(easyForms: EasyForms,text: String, label:String,
+                      passwordVisibility: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) {
     val textFieldState = easyForms.getTextFieldState(
         key = MyFormKeys.PASSWORD,
         easyFormsValidationType = PasswordValidationType,
+        defaultValue = text,
     )
     val state = textFieldState.state
-
+    //val passwordVisibility: Boolean by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = state.value,
         label = { Text(text = label) },
@@ -454,10 +545,12 @@ fun PasswordTextField(
                 Icons.Filled.Face
             else Icons.Filled.Lock
 
+            // Please provide localized description for accessibility services
             val description = if (passwordVisibility.value) "Hide password" else "Show password"
 
-            IconButton(onClick = { passwordVisibility.value = !passwordVisibility.value }) {
-                Icon(imageVector = image, contentDescription = description)
+            IconButton(
+                onClick = {passwordVisibility.value=!passwordVisibility.value }){
+                Icon(imageVector  = image, description)
             }
         }
     )

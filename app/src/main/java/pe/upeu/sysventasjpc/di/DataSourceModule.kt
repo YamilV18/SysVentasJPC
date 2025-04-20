@@ -5,6 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
+import pe.upeu.sysventasjpc.data.remote.RestCategoria
+import pe.upeu.sysventasjpc.data.remote.RestMarca
+import pe.upeu.sysventasjpc.data.remote.RestProducto
+import pe.upeu.sysventasjpc.data.remote.RestUnidadMedida
 import pe.upeu.sysventasjpc.utils.TokenUtils
 import pe.upeu.sysventasjpc.data.remote.RestUsuario
 import retrofit2.Retrofit
@@ -44,4 +48,28 @@ class DataSourceModule {
     fun restUsuario(retrofit: Retrofit): RestUsuario{
         return retrofit.create(RestUsuario::class.java)
     }
+
+    //Producto
+
+    @Singleton
+    @Provides
+    fun restProducto(retrofit: Retrofit): RestProducto{
+        return retrofit.create(RestProducto::class.java)
+    }
+    @Singleton
+    @Provides
+    fun restMarca(retrofit: Retrofit): RestMarca{
+        return retrofit.create(RestMarca::class.java)
+    }
+    @Singleton
+    @Provides
+    fun restCategoria(retrofit: Retrofit): RestCategoria{
+        return retrofit.create(RestCategoria::class.java)
+    }
+    @Singleton
+    @Provides
+    fun restUnidadMedida(retrofit: Retrofit): RestUnidadMedida{
+        return retrofit.create(RestUnidadMedida::class.java)
+    }
+
 }

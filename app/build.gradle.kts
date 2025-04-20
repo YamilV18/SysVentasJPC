@@ -64,21 +64,26 @@ dependencies {
 //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation ("com.squareup.retrofit2:converter-moshi:2.11.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
 //Formularios
-    implementation ("com.github.k0shk0sh:compose-easyforms:0.2.0")
+    implementation("com.github.k0shk0sh:compose-easyforms:0.2.0")
 //Agregados Dagger - Hilt
-    implementation ("com.google.dagger:hilt-android:2.52") //old 2.47
-    kapt ("com.google.dagger:hilt-compiler:2.52") //old 2.47
+    implementation("com.google.dagger:hilt-android:2.52") //old 2.47
+    kapt("com.google.dagger:hilt-compiler:2.52") //old 2.47
 //Agregado Dagger - Hilt Compose
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-//old 1.0.0
-    implementation("com.valentinilk.shimmer:compose-shimmer:1.3.1") //old 1.0.5
-    implementation ("io.coil-kt:coil-compose:2.7.0") //old 2.4.0
-//Agregado LiveData compose//implementation    ("androidx.compose.ui:ui-tooling")
-    implementation ("androidx.compose.foundation:foundation")
-    implementation ("androidx.compose.runtime:runtime-livedata")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0") //old 1.0.0
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.3.2") //old 1.0.5, 1.3.1
+//implementation ("io.coil-kt:coil-compose:2.7.0") //old 2.4.0
+    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
+//Agregado LiveData compose//implementation ("androidx.compose.ui:uitooling")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.runtime:runtime-livedata")
 //App Compact para detectar modo dia noche
     val appcompat_version = "1.7.0" //old 1.6.1
     implementation("androidx.appcompat:appcompat:$appcompat_version")//Agregado recien
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:deprecation")
 }
